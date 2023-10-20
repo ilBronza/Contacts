@@ -1,0 +1,41 @@
+{
+    "name": "ilbronza/contacts",
+    "description": ":package_description",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Davide Bronzini",
+            "email": "davide@sistema.srl",
+            "homepage": "https://sistema.srl"
+        }
+    ],
+    "homepage": "https://github.com/ilbronza/contacts",
+    "keywords": ["Laravel", "Contacts"],
+    "require": {
+        "ilbronza/crud": "dev-master"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~9.0",
+        "orchestra/testbench": "~7"
+    },
+    "autoload": {
+        "psr-4": {
+            "IlBronza\\Contacts\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "IlBronza\\Contacts\\Tests\\": "tests"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "IlBronza\\Contacts\\ContactsServiceProvider"
+            ],
+            "aliases": {
+                "Contacts": "IlBronza\\Contacts\\Facades\\Contacts"
+            }
+        }
+    }
+}
