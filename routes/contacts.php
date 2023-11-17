@@ -5,6 +5,7 @@ use IlBronza\Contacts\Contacts;
 Route::group([
 	'middleware' => ['web', 'auth'],
 	'prefix' => 'contact-management',
+	'routeTranslationPrefix' => 'contacts::routes.',
 	'as' => config('contacts.routePrefix')
 	],
 	function()
@@ -31,7 +32,7 @@ Route::group([
 	'middleware' => ['role:administrator|superadmin']
 ], function()
 {
-	// Route::get('', [Contacts::getController('contact', 'index'), 'index'])->name('contacts.index');
+	Route::get('', [Contacts::getController('contact', 'index'), 'index'])->name('contacts.index');
 	// Route::get('create', [Contacts::getController('contact', 'create'), 'create'])->name('contacts.create');
 	// Route::post('', [Contacts::getController('contact', 'store'), 'store'])->name('contacts.store');
 	// Route::get('{contact}', [Contacts::getController('contact', 'show'), 'show'])->name('contacts.show');

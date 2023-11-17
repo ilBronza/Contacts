@@ -9,7 +9,7 @@ class ContacttypeTableFieldsParameters extends FieldsGroupParametersFile
 	static function getFieldsGroup() : array
 	{
 		return [
-            'translationPrefix' => 'contacts',
+            'translationPrefix' => 'contacts::fields',
             'fields' => [
                 'mySelfEdit' => 'links.edit',
                 'mySelfSee' => 'links.see',

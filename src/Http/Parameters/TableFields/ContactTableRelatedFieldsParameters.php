@@ -9,7 +9,7 @@ class ContactTableRelatedFieldsParameters extends FieldsGroupParametersFile
 	static function getFieldsGroup() : array
 	{
 		return [
-            'translationPrefix' => 'contacts',
+            'translationPrefix' => 'contacts::fields',
             'fields' => [
                 // 'contactable' => 'relations.BelongsTo',
                 // 'contacttype' => 'relations.BelongsTo',

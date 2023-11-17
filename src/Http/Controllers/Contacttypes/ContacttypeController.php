@@ -50,6 +50,11 @@ class ContacttypeController extends BaseContactPackageController
         'destroy',
     ];
 
+    public function getIndexElementsRelationsArray() : array
+    {
+        return [];
+    }
+
     public function getIndexElements()
     {
         return $this->getModelClass()::withCount('contacts')->get();

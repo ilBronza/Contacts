@@ -2,14 +2,12 @@
 
 namespace IlBronza\Contacts\Models;
 
-use IlBronza\CRUD\Models\BaseModel;
-use IlBronza\CRUD\Traits\Model\PackagedModelsTrait;
+use IlBronza\CRUD\Models\PackagedBaseModel;
+use IlBronza\CRUD\Models\Scopes\ActiveScope;
 use IlBronza\Contacts\Models\Contacttype;
 
-class Contact extends BaseModel
+class Contact extends PackagedBaseModel
 {
-	use PackagedModelsTrait;
-
 	static $deletingRelationships = [];
 
 	static $packageConfigPrefix = 'contacts';
@@ -22,6 +20,6 @@ class Contact extends BaseModel
 
 	public function contactable()
 	{
-		return $this->morphTo();
+		return $this->morphTo()->withoutGlobalScope(ActiveScope::class);
 	}
 }

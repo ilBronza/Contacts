@@ -9,11 +9,16 @@ class ContactTableFieldsParameters extends FieldsGroupParametersFile
 	static function getFieldsGroup() : array
 	{
 		return [
-            'translationPrefix' => 'contacts',
+            'translationPrefix' => 'contacts::fields',
             'fields' => [
                 'mySelfEdit' => 'links.edit',
                 'mySelfSee' => 'links.see',
-                // 'contactable' => 'relations.BelongsTo',
+                'contactable' => [
+                    'translationPrefix' => 'contacts::fields',
+                    'type' => 'links.see',
+                    'textParameter' => 'name'
+                ],
+
                 'contacttype' => 'relations.BelongsTo',
                 'sorting_index' => 'flat',
                 'contact' => 'flat',
