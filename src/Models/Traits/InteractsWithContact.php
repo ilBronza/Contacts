@@ -20,7 +20,9 @@ trait InteractsWithContact
         if(! $contacttype->exists)
             $contacttype->save();
 
-        $contact = Contact::getProjectClassName()::make();
+        if(! $contact = Contact::getProjectClassName()::byType($contacttype)->where('contact', $contactString)->first())
+            $contact = Contact::getProjectClassName()::make();
+
         $contact->contact = $contactString;
         $contact->contacttype_slug = $contacttype->getKey();
 

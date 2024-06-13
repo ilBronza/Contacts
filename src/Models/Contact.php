@@ -22,4 +22,9 @@ class Contact extends PackagedBaseModel
 	{
 		return $this->morphTo()->withoutGlobalScope(ActiveScope::class);
 	}
+
+	public function scopeByType($query, Contacttype $contacttype)
+	{
+		return $query->where('contacttype_slug', $contacttype->getKey());
+	}
 }

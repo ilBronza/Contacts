@@ -6,5 +6,6 @@ use IlBronza\CRUD\Http\Controllers\BasePackageController;
 
 class BaseContactPackageController extends BasePackageController
 {
-    static $configFileName = 'contacts';
+    static $packageConfigPrefix = 'contacts';
+    // static $configFileName = 'contacts';
 }
