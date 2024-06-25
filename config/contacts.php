@@ -3,7 +3,9 @@
 use IlBronza\Contacts\Http\Controllers\Contacts\ContactCreateController;
 use IlBronza\Contacts\Http\Controllers\Contacts\ContactDestroyController;
 use IlBronza\Contacts\Http\Controllers\Contacts\ContactIndexController;
+use IlBronza\Contacts\Http\Controllers\Contacts\ContactShowController;
 use IlBronza\Contacts\Http\Controllers\Contacttypes\ContacttypeController;
+use IlBronza\Contacts\Http\Controllers\Parameters\RelationshipsManagers\ContacttypeRelationshipManager;
 use IlBronza\Contacts\Http\Parameters\FieldsetsParameters\ContacttypeFieldsetsParameters;
 use IlBronza\Contacts\Http\Parameters\FieldsetsParameters\CreateContactFieldsetsParameters;
 use IlBronza\Contacts\Http\Parameters\TableFields\ContactTableFieldsParameters;
@@ -14,6 +16,8 @@ use IlBronza\Contacts\Models\Contacttype;
 
 return [
 
+    'enabled' => true,
+
     'routePrefix' => 'contacts',
     
     'models' => [
@@ -22,6 +26,7 @@ return [
             'class' => Contact::class,
             'controllers' => [
                 'index' => ContactIndexController::class,
+                'show' => ContactShowController::class,
                 'createBy' => ContactCreateController::class,
                 'storeBy' => ContactCreateController::class,
                 'destroy' => ContactDestroyController::class
@@ -45,6 +50,9 @@ return [
                 'edit' => ContacttypeController::class,
                 'update' => ContacttypeController::class,
                 'destroy' => ContacttypeController::class
+            ],
+            'relationshipsManagerClasses' => [
+                'show' => ContacttypeRelationshipManager::class
             ],
             'parametersFiles' => [
                 'show' => ContacttypeFieldsetsParameters::class,

@@ -28,4 +28,9 @@ class Contacttype extends BaseModel
     {
     	return $this->hasMany(Contact::getProjectClassName());
     }
+
+    public function getRelatedContacts()
+    {
+    	return $this->contacts()->with('contactable', 'contacttype')->get();
+    }
 }

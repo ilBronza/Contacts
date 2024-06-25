@@ -55,6 +55,11 @@ class ContacttypeController extends BaseContactPackageController
         return [];
     }
 
+    public function getRelationshipsManagerClass()
+    {
+        return config("contacts.models.contacttype.relationshipsManagerClasses.show");
+    }
+
     public function getIndexElements()
     {
         return $this->getModelClass()::withCount('contacts')->get();

@@ -57,7 +57,7 @@ class Contacts implements RoutedObjectInterface
 
         $contactsButton = $menu->createButton([
             'name' => 'contactsmanager',
-            'icon' => 'user-gear',
+            'icon' => 'address-book',
             'text' => 'contacts::contacts.contacts'
         ]);
 
@@ -66,7 +66,7 @@ class Contacts implements RoutedObjectInterface
         $contactsButton->addChild(
             $menu->createButton([
                 'name' => 'contacts.index',
-                'icon' => 'users',
+                'icon' => 'list',
                 'text' => 'contacts::contacts.index',
                 'href' => IbRouter::route($this, 'contacts.index')
             ])
@@ -75,7 +75,7 @@ class Contacts implements RoutedObjectInterface
         $contactsButton->addChild(
             $menu->createButton([
                 'name' => 'contacttypes.index',
-                'icon' => 'users',
+                'icon' => 'gear',
                 'text' => 'contacts::contacts.contacttypes',
                 'href' => IbRouter::route($this, 'contacttypes.index')
             ])

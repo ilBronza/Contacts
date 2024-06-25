@@ -21,4 +21,12 @@ class ContactIndexController extends BaseContactPackageController
             'contactable'
         ];
     }
+
+    public function getIndexElements()
+    {
+        $with = $this->getIndexElementsRelationsArray();
+
+        return $this->getModelClass()::with($with)->get();
+    }
+
 }
