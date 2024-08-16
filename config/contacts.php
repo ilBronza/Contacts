@@ -1,5 +1,7 @@
 <?php
 
+use IlBronza\AccountManager\Models\User;
+use IlBronza\Contacts\Http\Controllers\Contacts\ContactByModelController;
 use IlBronza\Contacts\Http\Controllers\Contacts\ContactCreateController;
 use IlBronza\Contacts\Http\Controllers\Contacts\ContactDestroyController;
 use IlBronza\Contacts\Http\Controllers\Contacts\ContactIndexController;
@@ -13,19 +15,26 @@ use IlBronza\Contacts\Http\Parameters\TableFields\ContactTableRelatedFieldsParam
 use IlBronza\Contacts\Http\Parameters\TableFields\ContacttypeTableFieldsParameters;
 use IlBronza\Contacts\Models\Contact;
 use IlBronza\Contacts\Models\Contacttype;
+use IlBronza\Operators\Models\Operator;
 
 return [
 
     'enabled' => true,
 
     'routePrefix' => 'contacts',
+
+	'associableModelTypesFullClass' => [
+		User::getProjectClassName(),
+		Operator::getProjectClassName()
+	],
     
     'models' => [
         'contact' => [
             'table' => 'contacts__contacts',
             'class' => Contact::class,
             'controllers' => [
-                'index' => ContactIndexController::class,
+				'index' => ContactIndexController::class,
+				'byModel' => ContactByModelController::class,
                 'show' => ContactShowController::class,
                 'createBy' => ContactCreateController::class,
                 'storeBy' => ContactCreateController::class,

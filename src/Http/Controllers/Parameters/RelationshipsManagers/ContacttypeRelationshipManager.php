@@ -11,10 +11,7 @@ class ContacttypeRelationshipManager Extends RelationshipsManager
 		return [
 			'show' => [
 				'relations' => [
-					'contacts' => [
-						'controller' => config('contacts.models.contact.controllers.index'),
-						'elementGetterMethod' => 'getRelatedContacts',
-					]
+					'contacts' => config('contacts.models.contact.controllers.index')
 				]
 			]
 		];

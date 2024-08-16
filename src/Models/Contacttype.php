@@ -33,4 +33,22 @@ class Contacttype extends BaseModel
     {
     	return $this->contacts()->with('contactable', 'contacttype')->get();
     }
+
+	public function getHrefString() : ? string
+	{
+		return $this->href_string;
+	}
+
+	public function getIcon() :  ? string
+	{
+		if(! $this->fa_icon)
+			return "<i title=\"{$this->getName()}\" class=\"fa-solid fa-address-card\"></i>";
+
+		return "<i title=\"{$this->getName()}\" class=\"fa-solid fa-{$this->fa_icon}\"></i>";
+	}
+
+	public function hasHref() : bool
+	{
+		return !! $this->getHrefString();
+	}
 }

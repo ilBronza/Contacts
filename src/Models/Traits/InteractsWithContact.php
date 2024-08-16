@@ -5,6 +5,7 @@ namespace IlBronza\Contacts\Models\Traits;
 use IlBronza\Contacts\Models\Contact;
 use IlBronza\Contacts\Models\Contacttype;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Collection;
 
 trait InteractsWithContact
 {
@@ -12,6 +13,11 @@ trait InteractsWithContact
     {
     	return $this->morphMany(Contact::getProjectClassName(), 'contactable');
     }
+
+	public function getContacts() : Collection
+	{
+		return $this->contacts;
+	}
 
     public function addContact(string $contactString, string $type) : Contact
     {

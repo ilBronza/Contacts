@@ -6,9 +6,13 @@ use IlBronza\AccountManager\Models\User;
 use IlBronza\CRUD\Traits\CRUDCreateStoreByParentModelTrait;
 use IlBronza\Contacts\Http\Controllers\BaseContactPackageController;
 
+use function config;
+
 class ContactCreateController extends BaseContactPackageController
 {
-    use CRUDCreateStoreByParentModelTrait;
+	public bool $hasPolimorphicRelationship = true;
+
+	use CRUDCreateStoreByParentModelTrait;
 
     static $modelConfigPrefix = 'contact';
 
@@ -19,9 +23,12 @@ class ContactCreateController extends BaseContactPackageController
 
     public function getAssociableClassesList() : array
     {
-        return [
-            User::getProjectClassName()
-        ];
+		$result = [];
+
+		foreach(config('contacts.associableModelTypesFullClass') as $class)
+			$result[] = $class::make()->getMorphClass();
+
+		return $result;
     }
 
     public function getGenericParametersFile() : ? string

@@ -33,11 +33,12 @@ Route::group([
 ], function()
 {
 	Route::get('', [Contacts::getController('contact', 'index'), 'index'])->name('contacts.index');
+	Route::get('by-model/{model}/{id}', [Contacts::getController('contact', 'byModel'), 'byModel'])->name('contacts.byModelFetched');
 	// Route::get('create', [Contacts::getController('contact', 'create'), 'create'])->name('contacts.create');
 	// Route::post('', [Contacts::getController('contact', 'store'), 'store'])->name('contacts.store');
 	Route::get('{contact}', [Contacts::getController('contact', 'show'), 'show'])->name('contacts.show');
-	// Route::get('{contact}/edit', [Contacts::getController('contact', 'edit'), 'edit'])->name('contacts.edit');
-	// Route::put('{contact}', [Contacts::getController('contact', 'edit'), 'update'])->name('contacts.update');
+	 Route::get('{contact}/edit', [Contacts::getController('contact', 'edit'), 'edit'])->name('contacts.edit');
+	 Route::put('{contact}', [Contacts::getController('contact', 'edit'), 'update'])->name('contacts.update');
 	Route::delete('{contact}/delete', [Contacts::getController('contact', 'destroy'), 'destroy'])->name('contacts.destroy');
 });
 

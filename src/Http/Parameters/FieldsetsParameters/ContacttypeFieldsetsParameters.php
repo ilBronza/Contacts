@@ -12,7 +12,9 @@ class ContacttypeFieldsetsParameters extends FieldsetParametersFile
             'base' => [
                 'translationPrefix' => 'contacts',
                 'fields' => [
-                    'name' => ['text' => 'string|required|max:191'],
+					'name' => ['text' => 'string|required|max:191'],
+					'href_string' => ['text' => 'string|nullable|max:255'],
+					'fa_icon' => ['text' => 'string|nullable|max:32'],
                 ],
                 'width' => ['1-2@m']
             ]

@@ -1,0 +1,1 @@
+{!! (new \IlBronza\UikitTemplate\Fetcher(['url' => app('contacts')->route('contacts.byModelFetched', ['model' => $model->getMorphClass(), 'id' => $model->getKey()])]))->render() !!}

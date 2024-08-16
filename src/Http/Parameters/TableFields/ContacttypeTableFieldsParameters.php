@@ -13,7 +13,10 @@ class ContacttypeTableFieldsParameters extends FieldsGroupParametersFile
             'fields' => [
                 'mySelfEdit' => 'links.edit',
                 'mySelfSee' => 'links.see',
-                'name' => 'flat',
+				'name' => 'flat',
+				'href_string' => 'flat',
+				'fa_icon' => 'flat',
+				'mySelfIcon.fa_icon' => 'icon',
 
                 'contacts_count' => 'flat',
 
