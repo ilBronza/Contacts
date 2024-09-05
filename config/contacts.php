@@ -35,7 +35,8 @@ return [
             'controllers' => [
 				'index' => ContactIndexController::class,
 				'byModel' => ContactByModelController::class,
-                'show' => ContactShowController::class,
+				'show' => ContactShowController::class,
+				'edit' => ContactEditUpdateController::class,
                 'createBy' => ContactCreateController::class,
                 'storeBy' => ContactCreateController::class,
                 'destroy' => ContactDestroyController::class
