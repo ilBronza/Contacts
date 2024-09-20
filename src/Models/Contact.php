@@ -22,9 +22,21 @@ class Contact extends PackagedBaseModel
 		return $this->belongsTo(Contacttype::getProjectClassName());
 	}
 
+	public function getContacttype() : ? Contacttype
+	{
+		if($this->relationLoaded('contacttype'))
+			return $this->contacttype;
+
+		$contacttype = Contacttype::gpc()::findCached($this->contacttype_slug);
+
+		$this->relationLoaded('contacttype', $contacttype);
+
+		return $contacttype;
+	}
+
 	public function getType() : ? Contacttype
 	{
-		return $this->contacttype;
+		return $this->getContacttype();
 	}
 
 	public function contactable()
@@ -45,6 +57,16 @@ class Contact extends PackagedBaseModel
 	public function getContact() : ? string
 	{
 		return $this->contact;
+	}
+
+	public function getIconString() : ? string
+	{
+		return $this->getContacttype()->getIcon();
+	}
+
+	public function getFullString() : string
+	{
+		return view('contacts::contacts._contact', ['contact' => $this])->render();
 	}
 
 	public function getDeleteButton()

@@ -9,6 +9,11 @@ use Illuminate\Support\Collection;
 
 trait InteractsWithContact
 {
+	public function getContactsByTypes(array $types = [])
+	{
+		return  1234567890;
+	}
+
     public function contacts() : MorphMany
     {
     	return $this->morphMany(Contact::getProjectClassName(), 'contactable');
