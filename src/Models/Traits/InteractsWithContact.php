@@ -9,12 +9,17 @@ use Illuminate\Support\Collection;
 
 trait InteractsWithContact
 {
-	public function getContactsByTypes(array $types = [])
+	public function getContactsByTypes(array $types = []) : Collection
 	{
-		return  1234567890;
+		return $this->getContacts()->whereIn('contacttype_slug', $types);
 	}
 
-    public function contacts() : MorphMany
+	public function getContactsByType(string $type) : Collection
+	{
+		return $this->getContacts()->where('contacttype_slug', $type);
+	}
+
+	public function contacts() : MorphMany
     {
     	return $this->morphMany(Contact::getProjectClassName(), 'contactable');
     }
@@ -22,6 +27,11 @@ trait InteractsWithContact
 	public function getContacts() : Collection
 	{
 		return $this->contacts;
+	}
+
+	public function getMobileString() : ? string
+	{
+		return $this->getContactsByType('mobile')->first()?->contact;
 	}
 
     public function addContact(string $contactString, string $type) : Contact

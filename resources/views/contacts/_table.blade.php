@@ -54,6 +54,7 @@
         @endforeach
     </table>
 
-    {!! IlBronza\Contacts\Helpers\ContactCreatorHelper::getCreateContactButtonByModel($model)->render() !!}
-
 @endif
+
+{!! IlBronza\Contacts\Helpers\ContactCreatorHelper::getCreateContactButtonByModel($model)->render() !!}
+
