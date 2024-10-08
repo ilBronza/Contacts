@@ -41,7 +41,7 @@
                 </td>
                 <td>
                     @if($type?->hasHref())
-                        <a href="{{ $type->getHrefString() }}:{{ $contact->getContact() }}" target="_blank">
+                        <a class="uk-text-truncate" href="{{ $type->getHrefString() }}:{{ $contact->getContact() }}" target="_blank">
                     @endif
 
                     {{ $contact->getContact() }}

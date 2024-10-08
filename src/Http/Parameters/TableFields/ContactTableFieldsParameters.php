@@ -16,11 +16,11 @@ class ContactTableFieldsParameters extends FieldsGroupParametersFile
                 'contactable' => [
                     'translationPrefix' => 'contacts::fields',
                     'type' => 'links.see',
-                    'textParameter' => 'name'
+                    'textParameter' => 'name',
+	                'width' => '250px'
                 ],
 
                 'contacttype' => 'relations.BelongsTo',
-                'sorting_index' => 'flat',
                 'contact' => 'flat',
 
                 'mySelfDelete' => 'links.delete'
