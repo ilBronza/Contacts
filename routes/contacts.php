@@ -33,6 +33,8 @@ Route::group([
 ], function()
 {
 	Route::get('', [Contacts::getController('contact', 'index'), 'index'])->name('contacts.index');
+
+	//ContactByModelController
 	Route::get('by-model/{model}/{id}', [Contacts::getController('contact', 'byModel'), 'byModel'])->name('contacts.byModelFetched');
 	// Route::get('create', [Contacts::getController('contact', 'create'), 'create'])->name('contacts.create');
 	// Route::post('', [Contacts::getController('contact', 'store'), 'store'])->name('contacts.store');

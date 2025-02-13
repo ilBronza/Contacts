@@ -24,8 +24,8 @@ return [
     'routePrefix' => 'contacts',
 
 	'associableModelTypesFullClass' => [
-		User::getProjectClassName(),
-		Operator::getProjectClassName()
+		User::class,
+		Operator::class
 	],
     
     'models' => [
