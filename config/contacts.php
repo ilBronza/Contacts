@@ -1,9 +1,11 @@
 <?php
 
 use IlBronza\AccountManager\Models\User;
+use IlBronza\Clients\Models\Client;
 use IlBronza\Contacts\Http\Controllers\Contacts\ContactByModelController;
 use IlBronza\Contacts\Http\Controllers\Contacts\ContactCreateController;
 use IlBronza\Contacts\Http\Controllers\Contacts\ContactDestroyController;
+use IlBronza\Contacts\Http\Controllers\Contacts\ContactEditUpdateController;
 use IlBronza\Contacts\Http\Controllers\Contacts\ContactIndexController;
 use IlBronza\Contacts\Http\Controllers\Contacts\ContactShowController;
 use IlBronza\Contacts\Http\Controllers\Contacttypes\ContacttypeController;
@@ -21,10 +23,19 @@ return [
 
     'enabled' => true,
 
+	'roles' => [
+		'show' => [
+			'any' => [
+				'contacts'
+			]
+		]
+	],
+
     'routePrefix' => 'contacts',
 
 	'associableModelTypesFullClass' => [
 		User::class,
+		Client::class,
 		Operator::class
 	],
     
@@ -42,7 +53,8 @@ return [
                 'destroy' => ContactDestroyController::class
             ],
             'parametersFiles' => [
-                'create' => CreateContactFieldsetsParameters::class,
+	            'create' => CreateContactFieldsetsParameters::class,
+	            'edit' => CreateContactFieldsetsParameters::class,
             ],
             'fieldsGroupsFiles' => [
                 'index' => ContactTableFieldsParameters::class,

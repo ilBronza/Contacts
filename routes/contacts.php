@@ -14,7 +14,7 @@ Route::group([
 
 Route::group([
 	'prefix' => 'types',
-	'middleware' => ['role:administrator|superadmin']
+	'middleware' => ['role:administrator|superadmin|contacts']
 ], function()
 {
 	Route::get('', [Contacts::getController('contacttype', 'index'), 'index'])->name('contacttypes.index');
@@ -29,7 +29,7 @@ Route::group([
 
 Route::group([
 	'prefix' => 'contacts',
-	'middleware' => ['role:administrator|superadmin']
+	'middleware' => ['role:administrator|superadmin|contacts']
 ], function()
 {
 	Route::get('', [Contacts::getController('contact', 'index'), 'index'])->name('contacts.index');

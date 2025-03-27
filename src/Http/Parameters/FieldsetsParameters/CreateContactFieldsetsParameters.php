@@ -18,7 +18,7 @@ class CreateContactFieldsetsParameters extends FieldsetParametersFile
                     'contact' => [
                         'text' => 'string|required|max:191'
                     ],
-                    'contacttype_id' => [
+                    'contacttype_slug' => [
                         'type' => 'select',
                         'multiple' => false,
                         'relation' => 'contacttype',

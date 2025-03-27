@@ -2,6 +2,7 @@
 
 namespace IlBronza\Contacts\Http\Controllers\Contacts;
 
+use IlBronza\Contacts\Http\Controllers\BaseContactPackageController;
 use IlBronza\CRUD\Traits\CRUDEditUpdateTrait;
 use Illuminate\Http\Request;
 
@@ -9,6 +10,8 @@ use function config;
 
 class ContactEditUpdateController extends BaseContactPackageController
 {
+	public $configModelClassName = 'contact';
+
 	use CRUDEditUpdateTrait;
 
 	public $allowedMethods = ['edit', 'update'];

@@ -31,8 +31,8 @@
     <table class="uk-width-1-1 uk-table uk-table-small {{ $key }}">
         @foreach($contacts as $contact)
             <tr>
-                <td class="uk-visible@l">
-                    <a href="{{ $contact->getEditUrl() }}" uk-icon="file-edit"></a>
+                <td class="uk-visible@l"  uk-lightbox>
+                    <a href="{{ $contact->getEditUrl() }}" uk-icon="file-edit"  data-type="iframe"></a>
                 </td>
                 <td class="uk-visible@l">
                     @if($type = $contact->getType())

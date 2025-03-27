@@ -16,6 +16,9 @@ class DatatableFieldSingle extends DatatableField
 
 	public function transformValue($value)
 	{
+		if(! $value)
+			return null;
+		
 		foreach($value as $_value)
 			if($_value->contacttype_slug == $this->getContacttype())
 				return $_value->getFullString();
