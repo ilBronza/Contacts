@@ -43,6 +43,13 @@ return [
         'contact' => [
             'table' => 'contacts__contacts',
             'class' => Contact::class,
+	        'roles' => [
+		        'show' => [
+					'any' => [
+						'contacts'
+					]
+		        ]
+	        ],
             'controllers' => [
 				'index' => ContactIndexController::class,
 				'byModel' => ContactByModelController::class,
