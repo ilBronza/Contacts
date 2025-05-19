@@ -15,9 +15,11 @@ use IlBronza\Contacts\Http\Controllers\BaseContactPackageController;
 use IlBronza\Contacts\Models\Contacttype;
 use Illuminate\Http\Request;
 
+use function config;
+
 class ContacttypeController extends BaseContactPackageController
 {
-    use PackageStandardIndexTrait;
+//    use PackageStandardIndexTrait;
 
     static $modelConfigPrefix = 'contacttype';
 
@@ -50,12 +52,27 @@ class ContacttypeController extends BaseContactPackageController
         'destroy',
     ];
 
-    public function getIndexElementsRelationsArray() : array
+	function getIndexElementsScopesArray() : array
+	{
+		return $this->scopes;
+	}
+
+	public function getIndexElementsRelationsArray() : array
     {
         return [];
     }
 
-    public function getRelationshipsManagerClass()
+	public function getRelatedFieldsArray()
+	{
+		return config("{$this->getPackageConfigName()}.models.{$this->getModelConfigPrefix()}.fieldsGroupsFiles.related")::getFieldsGroup();
+	}
+
+	public function getIndexFieldsArray()
+	{
+		return config("{$this->getPackageConfigName()}.models.{$this->getModelConfigPrefix()}.fieldsGroupsFiles.index")::getFieldsGroup();
+	}
+
+	public function getRelationshipsManagerClass()
     {
         return config("contacts.models.contacttype.relationshipsManagerClasses.show");
     }
