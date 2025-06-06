@@ -21,7 +21,7 @@ use IlBronza\Operators\Models\Operator;
 
 return [
 
-    'enabled' => true,
+    'enabled' => false,
 
 	'roles' => [
 		'show' => [

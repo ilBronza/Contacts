@@ -2,10 +2,13 @@
 
 namespace IlBronza\Contacts;
 
+use IlBronza\CRUD\Traits\IlBronzaPackages\IlBronzaServiceProviderPackagesTrait;
 use Illuminate\Support\ServiceProvider;
 
 class ContactsServiceProvider extends ServiceProvider
 {
+    use IlBronzaServiceProviderPackagesTrait;
+
     /**
      * Perform post-registration booting of services.
      *
