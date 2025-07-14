@@ -4,6 +4,7 @@ return [
 	'index' => 'Lista',
 	'contact' => 'Contatto',
 	'contacts' => 'Contatti',
+	'contacttype_slug' => 'Tipologia',
 	'contacttypes' => 'Tipologie',
 	'contacttype_id' => 'Tipo di contatto',
 	'sorting_index' => 'Ordinamento',
