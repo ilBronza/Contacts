@@ -2,7 +2,7 @@
 
 namespace IlBronza\Contacts\Http\Controllers\Contacts;
 
-use IlBronza\CRUD\Http\Controllers\Traits\PackageStandardIndexTrait;
+use IlBronza\CRUD\Http\Controllers\Traits\StandardTraits\PackageStandardIndexTrait;
 use IlBronza\Contacts\Http\Controllers\BaseContactPackageController;
 
 class ContactIndexController extends BaseContactPackageController

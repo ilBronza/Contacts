@@ -2,7 +2,7 @@
 
 namespace IlBronza\Contacts\Http\Controllers\Contacttypes;
 
-use IlBronza\CRUD\Http\Controllers\Traits\PackageStandardIndexTrait;
+use IlBronza\CRUD\Http\Controllers\Traits\StandardTraits\PackageStandardIndexTrait;
 use IlBronza\CRUD\Traits\CRUDBelongsToManyTrait;
 use IlBronza\CRUD\Traits\CRUDCreateStoreTrait;
 use IlBronza\CRUD\Traits\CRUDDeleteTrait;

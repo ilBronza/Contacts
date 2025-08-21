@@ -23,6 +23,13 @@ return [
 
     'enabled' => false,
 
+    'datatableFieldWidths' => [
+		'datatableFieldContact' => 'auto',
+        'datatableFieldEmail' => '15em',
+        'datatableFieldMobile' => '10em',
+	    'datatableFieldSingle' => 'auto'
+    ],
+
 	'roles' => [
 		'show' => [
 			'any' => [
