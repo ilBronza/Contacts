@@ -9,5 +9,7 @@ return [
   'contacts_count' => 'Contatti',
   'mySelfTargetType.contactable' => 'Elemento',
   'created_at' => 'Creato il',
-  'contacts' => 'Contatti'
+  'contacts' => 'Contatti',
+  'href_string' => 'TODO',
+  'fa_icon' => 'TODO',
 ];

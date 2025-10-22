@@ -10,5 +10,6 @@ return [
 	'sorting_index' => 'Ordinamento',
 	'createNew' => 'Crea nuovo contatto',
 	'base' => 'Base',
-	'contacts' => 'Contatti'
+	'contacts' => 'Contatti',
+	'contacttype' => 'Tipo'
 ];
