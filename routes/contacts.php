@@ -23,7 +23,7 @@ Route::group([
 	Route::get('{contacttype}', [Contacts::getController('contacttype', 'show'), 'show'])->name('contacttypes.show');
 	Route::get('{contacttype}/edit', [Contacts::getController('contacttype', 'edit'), 'edit'])->name('contacttypes.edit');
 	Route::put('{contacttype}', [Contacts::getController('contacttype', 'edit'), 'update'])->name('contacttypes.update');
-	Route::delete('{contacttype}/delete', [Contacts::getController('contacttype', 'destroy'), 'destroy'])->name('types.destroy');
+	Route::delete('{contacttype}/delete', [Contacts::getController('contacttype', 'destroy'), 'destroy'])->name('contacttypes.destroy');
 });
 
 

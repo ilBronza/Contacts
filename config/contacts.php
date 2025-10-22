@@ -9,6 +9,7 @@ use IlBronza\Contacts\Http\Controllers\Contacts\ContactEditUpdateController;
 use IlBronza\Contacts\Http\Controllers\Contacts\ContactIndexController;
 use IlBronza\Contacts\Http\Controllers\Contacts\ContactShowController;
 use IlBronza\Contacts\Http\Controllers\Contacttypes\ContacttypeController;
+use IlBronza\Contacts\Http\Controllers\Contacttypes\ContacttypeIndexController;
 use IlBronza\Contacts\Http\Controllers\Parameters\RelationshipsManagers\ContacttypeRelationshipManager;
 use IlBronza\Contacts\Http\Parameters\FieldsetsParameters\ContacttypeFieldsetsParameters;
 use IlBronza\Contacts\Http\Parameters\FieldsetsParameters\CreateContactFieldsetsParameters;
@@ -79,7 +80,7 @@ return [
             'table' => 'contacts__contacttypes',
             'class' => Contacttype::class,
             'controllers' => [
-                'index' => ContacttypeController::class,
+                'index' => ContacttypeIndexController::class,
                 'create' => ContacttypeController::class,
                 'store' => ContacttypeController::class,
                 'show' => ContacttypeController::class,

@@ -9,4 +9,5 @@ return [
   'contacts_count' => 'Contatti',
   'mySelfTargetType.contactable' => 'Elemento',
   'created_at' => 'Creato il',
+  'contacts' => 'Contatti'
 ];
