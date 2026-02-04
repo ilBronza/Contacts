@@ -64,12 +64,12 @@ class ContacttypeController extends BaseContactPackageController
 
 	public function getRelatedFieldsArray()
 	{
-		return config("{$this->getPackageConfigName()}.models.{$this->getModelConfigPrefix()}.fieldsGroupsFiles.related")::getFieldsGroup();
+		return config("{$this->getPackageConfigName()}.models.{$this->getModelConfigPrefix()}.fieldsGroupsFiles.related")::getTracedFieldsGroup();
 	}
 
 	public function getIndexFieldsArray()
 	{
-		return config("{$this->getPackageConfigName()}.models.{$this->getModelConfigPrefix()}.fieldsGroupsFiles.index")::getFieldsGroup();
+		return config("{$this->getPackageConfigName()}.models.{$this->getModelConfigPrefix()}.fieldsGroupsFiles.index")::getTracedFieldsGroup();
 	}
 
 	public function getRelationshipsManagerClass()
