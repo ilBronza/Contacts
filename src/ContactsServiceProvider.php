@@ -2,6 +2,7 @@
 
 namespace IlBronza\Contacts;
 
+use IlBronza\Contacts\Http\Middleware\ContactsMiddlewareRolesPermissions;
 use IlBronza\CRUD\Traits\IlBronzaPackages\IlBronzaServiceProviderPackagesTrait;
 use Illuminate\Support\ServiceProvider;
 
@@ -20,6 +21,8 @@ class ContactsServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'contacts');
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         $this->loadRoutesFrom(__DIR__.'/../routes/contacts.php');
+
+        $this->app['router']->aliasMiddleware('contacts.roles', ContactsMiddlewareRolesPermissions::class);
 
         // Publishing is only necessary when using the CLI.
         if ($this->app->runningInConsole()) {

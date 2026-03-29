@@ -41,6 +41,15 @@ return [
 
     'routePrefix' => 'contacts',
 
+    'defaultRoles' => [
+        'administrator',
+        'superadmin',
+        'contacts',
+    ],
+
+    'routeRoles' => [
+    ],
+
 	'associableModelTypesFullClass' => [
 		User::class,
 		Client::class,
