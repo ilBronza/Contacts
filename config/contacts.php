@@ -25,7 +25,8 @@ return [
     'enabled' => false,
 
     'datatableFieldWidths' => [
-		'datatableFieldContact' => 'auto',
+        'datatableFieldContact' => 'auto',
+        'datatableFieldContacts' => 'auto',
         'datatableFieldEmail' => '15em',
         'datatableFieldMobile' => '10em',
 	    'datatableFieldSingle' => 'auto'
