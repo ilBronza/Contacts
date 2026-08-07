@@ -1,14 +1,16 @@
 <?php
 
 return [
-
 	'contactscontacts' => [
 		'index' => 'Indice dei contatti',
 		'createBy' => 'Crea e associa',
 		'store' => 'Crea contatto',
 		'destroy' => 'Elimina contatto',
 	],
-
+	'contactscontactsbyModelFetched' => 'Per modello — elemento',
+	'contactscontactsedit' => 'Modifica elemento :model',
+	'contactscontactsshow' => 'Mostra elemento :model',
+	'contactscontactsupdate' => 'Aggiorna elemento',
 	'contactscontacttypes' => [
 		'index' => 'Tipi di contatto',
 		'store' => 'Crea tipo di contatto',
@@ -17,6 +19,6 @@ return [
 		'update' => 'Modifica tipo di contatto',
 		'edit' => 'Modifica tipo di contatto',
 	],
-
+	'contactscontacttypesdestroy' => 'Elimina tipo contatto',
 	'contactstypes.destroy' => 'Elimina tipo di contatto',
 ];
