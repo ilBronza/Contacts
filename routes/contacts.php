@@ -5,7 +5,7 @@ use IlBronza\Contacts\Contacts;
 Route::group([
 	'middleware' => ['web', 'auth'],
 	'prefix' => 'contact-management',
-	'routeTranslationPrefix' => 'contacts::routes.',
+	'routeTranslationPrefix' => Contacts::getRouteTranslationPrefix(),
 	'as' => config('contacts.routePrefix')
 	],
 	function()
