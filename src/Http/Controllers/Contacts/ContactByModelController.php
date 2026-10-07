@@ -3,10 +3,7 @@
 namespace IlBronza\Contacts\Http\Controllers\Contacts;
 
 use IlBronza\Contacts\Http\Controllers\BaseContactPackageController;
-use IlBronza\Contacts\Models\Contact;
-use Illuminate\Database\Eloquent\Relations\Relation;
-
-use function get_class_methods;
+use IlBronza\Contacts\Support\ContactableResolver;
 
 class ContactByModelController extends BaseContactPackageController
 {
@@ -15,23 +12,11 @@ class ContactByModelController extends BaseContactPackageController
 
 	public function byModel(string $modelClass, string $modelId)
 	{
-		$contactableClass = Contact::make()->getActualClassNameForMorph($modelClass);
-
-		$model = $contactableClass::find($key = $modelId);
-
-		if(! $model->userCanSee())
-			abort(403);
-
-		$contacts = $model->getContacts('conctacttype');
+		$model = ContactableResolver::resolve($modelClass, $modelId);
+        $key = $model->getKey();
+        $contacts = $model->contacts()->with('contacttype')->get();
 
 		return view('contacts::contacts._table', compact('contacts', 'key', 'model'))->render();
 	}
-
-    public function getIndexElements()
-    {
-        $with = $this->getIndexElementsRelationsArray();
-
-        return $this->getModelClass()::with($with)->get();
-    }
 
 }

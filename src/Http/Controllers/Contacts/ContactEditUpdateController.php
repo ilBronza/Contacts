@@ -23,14 +23,14 @@ class ContactEditUpdateController extends BaseContactPackageController
 
 	public function edit(string $contact)
 	{
-		$contact = $this->findModel($contact);
+		$contact = $this->getModelInstance($contact);
 
 		return $this->_edit($contact);
 	}
 
 	public function update(Request $request, $contact)
 	{
-		$contact = $this->findModel($contact);
+		$contact = $this->getModelInstance($contact);
 
 		return $this->_update($request, $contact);
 	}

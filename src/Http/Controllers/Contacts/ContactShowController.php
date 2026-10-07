@@ -11,7 +11,7 @@ class ContactShowController extends BaseContactPackageController
 
     public function show(string $contact)
     {
-        $contact = $this->findModel($contact);
+        $contact = $this->getModelInstance($contact);
 
         return $this->_show($contact);
     }

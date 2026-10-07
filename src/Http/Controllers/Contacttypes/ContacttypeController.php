@@ -84,7 +84,7 @@ class ContacttypeController extends BaseContactPackageController
 
     public function getContacttype(int|string $contacttype)
     {
-        return $this->getModelClass()::find($contacttype);
+        return $this->getModelClass()::findOrFail($contacttype);
     }
 
     public function show(int|string $contacttype)
@@ -115,4 +115,3 @@ class ContacttypeController extends BaseContactPackageController
         return $this->_destroy($contacttype);
     }
 }
-

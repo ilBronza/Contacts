@@ -22,8 +22,7 @@ class ContacttypeIndexController extends BaseContactPackageController
     {
         $with = $this->getIndexElementsRelationsArray();
 
-        return $this->getModelClass()::with($with)->get();
+        return $this->getModelClass()::with($with)->withCount('contacts')->get();
     }
     
 }
-

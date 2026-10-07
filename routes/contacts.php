@@ -1,9 +1,10 @@
 <?php
 
 use IlBronza\Contacts\Contacts;
+use Illuminate\Support\Facades\Route;
 
 Route::group([
-	'middleware' => ['web', 'auth'],
+	'middleware' => ['web', 'auth', 'contacts.roles'],
 	'prefix' => 'contact-management',
 	'routeTranslationPrefix' => Contacts::getRouteTranslationPrefix(),
 	'as' => config('contacts.routePrefix')
@@ -14,7 +15,6 @@ Route::group([
 
 Route::group([
 	'prefix' => 'types',
-	'middleware' => ['contacts.roles']
 ], function()
 {
 	Route::get('', [Contacts::getController('contacttype', 'index'), 'index'])->name('contacttypes.index');
@@ -29,7 +29,6 @@ Route::group([
 
 Route::group([
 	'prefix' => 'contacts',
-	'middleware' => ['contacts.roles']
 ], function()
 {
 	Route::get('', [Contacts::getController('contact', 'index'), 'index'])->name('contacts.index');
