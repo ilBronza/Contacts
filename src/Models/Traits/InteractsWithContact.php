@@ -4,6 +4,7 @@ namespace IlBronza\Contacts\Models\Traits;
 
 use IlBronza\Contacts\Models\Contact;
 use IlBronza\Contacts\Models\Contacttype;
+use IlBronza\Contacts\Contacts;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Collection;
 
@@ -36,18 +37,28 @@ trait InteractsWithContact
 
     public function addContact(string $contactString, string $type) : Contact
     {
-        $contacttype = Contacttype::getProjectClassName()::firstOrNew(['name' => $type]);
+        if (! $this->exists)
+            throw new \LogicException('Save the contact owner before adding a contact.');
 
-        if(! $contacttype->exists)
-            $contacttype->save();
+        $contact = $this->getConnection()->transaction(function () use ($contactString, $type) {
+            $contacttype = Contacttype::getProjectClassName()::firstOrNew(['name' => $type]);
 
-        if(! $contact = Contact::getProjectClassName()::byType($contacttype)->where('contact', $contactString)->first())
-            $contact = Contact::getProjectClassName()::make();
+            if (! $contacttype->exists)
+                $contacttype->save();
 
-        $contact->contact = $contactString;
-        $contact->contacttype_slug = $contacttype->getKey();
+            $contactString = Contacts::normalizeAndValidateContact($contactString, $contacttype->getKey());
 
-        $this->contacts()->save($contact);
+            $contact = $this->contacts()->byType($contacttype)->where('contact', $contactString)->first()
+                ?? Contact::getProjectClassName()::make();
+
+            $contact->contact = $contactString;
+            $contact->contacttype_slug = $contacttype->getKey();
+            $this->contacts()->save($contact);
+
+            return $contact;
+        });
+
+        $this->unsetRelation('contacts');
 
         return $contact;
     }

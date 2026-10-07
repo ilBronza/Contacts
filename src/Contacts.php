@@ -25,26 +25,64 @@ class Contacts implements RoutedObjectInterface
 
     static public function extractEmails(string $wannabeEmails) : array|false
     {
-        $pattern = '/[a-z0-9_\-\+\.]+@[a-z0-9\-]+\.([a-z]{2,4})(?:\.[a-z]{2})?/i';
+        // Capture the entire candidate before validating; never accept a truncated domain.
+        $pattern = '~[^\s<>()\[\],;:"\\\\]+@[^\s<>()\[\],;:"\\\\]+~u';
         
         preg_match_all($pattern, $wannabeEmails, $matches);
 
-        return $matches[0];
+        $emails = array_map(static fn (string $email) => rtrim(trim($email, "'"), '.!?'), $matches[0] ?? []);
+
+        return array_values(array_filter($emails, static fn (string $email) => static::isValidEmail($email)));
     }
 
     static public function isValidPhoneNumber(string $phoneNumber) : bool
     {
-        return preg_match('/^\+?[0-9]{9,}(X[0-9]{1,})?$/', $phoneNumber);
+        return preg_match('/\A\+?[0-9]{7,15}(?:X[0-9]{1,10})?\z/', $phoneNumber) === 1;
     }
 
     static public function extractPhoneNumber(string $wannabePhone) : ? string
     {
-        $result = preg_replace('/[^0-9X+]/', '', $wannabePhone);
+        $phone = trim($wannabePhone);
+
+        if (! preg_match('/\A([+0-9().\s-]+?)(?:\s*(?:x|ext\.?)\s*([0-9]{1,10}))?\z/i', $phone, $matches))
+            return null;
+
+        $result = preg_replace('/[().\s-]/', '', $matches[1]);
+
+        if (isset($matches[2]))
+            $result .= 'X' . $matches[2];
 
         if(static::isValidPhoneNumber($result))
             return $result;
 
         return null;
+    }
+
+    public static function normalizeContact(string $value, ?string $type = null) : string
+    {
+        $value = trim($value);
+        $normalizer = config('contacts.contactTypes.' . $type . '.normalizer', 'trim');
+
+        if ($normalizer === 'email' && ($position = strrpos($value, '@')) !== false)
+            return substr($value, 0, $position + 1) . strtolower(substr($value, $position + 1));
+
+        if ($normalizer === 'phone')
+            return static::extractPhoneNumber($value) ?? $value;
+
+        return $value;
+    }
+
+    public static function normalizeAndValidateContact(?string $value, ?string $type = null) : string
+    {
+        $value = static::normalizeContact((string) $value, $type);
+        $rules = config('contacts.contactTypes.' . $type . '.rules', []);
+        $rules = is_string($rules) ? explode('|', $rules) : $rules;
+
+        Validator::make(['contact' => $value], [
+            'contact' => array_merge(['bail', 'required', 'string', 'max:191'], $rules),
+        ])->validate();
+
+        return $value;
     }
 
 

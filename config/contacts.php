@@ -42,6 +42,24 @@ return [
 
     'routePrefix' => 'contacts',
 
+    'allowedHrefSchemes' => ['mailto', 'tel', 'sms', 'http', 'https'],
+
+    // Keys are contact type slugs. Unlisted types receive trimming and basic string validation.
+    'contactTypes' => [
+        'email' => [
+            'normalizer' => 'email',
+            'rules' => ['email'],
+        ],
+        'mobile' => [
+            'normalizer' => 'phone',
+            'rules' => ['regex:/\A\+?[0-9]{7,15}(?:X[0-9]{1,10})?\z/'],
+        ],
+        'phone' => [
+            'normalizer' => 'phone',
+            'rules' => ['regex:/\A\+?[0-9]{7,15}(?:X[0-9]{1,10})?\z/'],
+        ],
+    ],
+
     'defaultRoles' => [
         'administrator',
         'superadmin',

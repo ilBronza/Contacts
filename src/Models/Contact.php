@@ -4,6 +4,7 @@ namespace IlBronza\Contacts\Models;
 
 use IlBronza\CRUD\Models\PackagedBaseModel;
 use IlBronza\CRUD\Models\Scopes\ActiveScope;
+use IlBronza\Contacts\Contacts;
 use IlBronza\Contacts\Models\Contacttype;
 use Illuminate\Database\Eloquent\Model;
 
@@ -27,9 +28,11 @@ class Contact extends PackagedBaseModel
 		if($this->relationLoaded('contacttype'))
 			return $this->contacttype;
 
-		$contacttype = Contacttype::gpc()::findCached($this->contacttype_slug);
+		$contacttype = $this->contacttype_slug === null
+            ? null
+            : Contacttype::gpc()::findCached($this->contacttype_slug);
 
-		$this->relationLoaded('contacttype', $contacttype);
+		$this->setRelation('contacttype', $contacttype);
 
 		return $contacttype;
 	}
@@ -44,7 +47,7 @@ class Contact extends PackagedBaseModel
 		return $this->morphTo()->withoutGlobalScope(ActiveScope::class);
 	}
 
-	public function getContactable() : Model
+	public function getContactable() : ?Model
 	{
 		return $this->contactable;
 	}
@@ -61,8 +64,24 @@ class Contact extends PackagedBaseModel
 
 	public function getIconString() : ? string
 	{
-		return $this->getContacttype()->getIcon();
+		return $this->getContacttype()?->getIcon();
 	}
+
+    public function getHref() : ?string
+    {
+        return $this->getContacttype()?->getHrefForContact((string) $this->getContact());
+    }
+
+    public function save(array $options = [])
+    {
+        if ($this->isDirty('contacttype_slug'))
+            $this->unsetRelation('contacttype');
+
+        if (! $this->exists || $this->isDirty(['contact', 'contacttype_slug']))
+            $this->contact = Contacts::normalizeAndValidateContact($this->contact, $this->contacttype_slug);
+
+        return parent::save($options);
+    }
 
 	public function getFullString() : string
 	{
