@@ -11,5 +11,7 @@ return [
 	'createNew' => 'Crea nuovo contatto',
 	'base' => 'Base',
 	'contacts' => 'Contatti',
-	'contacttype' => 'Tipo'
+	'contacttype' => 'Tipo',
+    'cardTitleCreate' => 'Crea contatto',
+    'cardIntroCreate' => 'Compila i dati e salva per completare la creazione.',
 ];

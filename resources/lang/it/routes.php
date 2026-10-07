@@ -21,4 +21,5 @@ return [
 	],
 	'contactscontacttypesdestroy' => 'Elimina tipo contatto',
 	'contactstypes.destroy' => 'Elimina tipo di contatto',
+    'contactscontacts.byModelFetched' => 'Contatti dell’elemento',
 ];

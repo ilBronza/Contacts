@@ -12,4 +12,5 @@ return [
   'contacts' => 'Contatti',
   'href_string' => 'TODO',
   'fa_icon' => 'TODO',
+    'mySelfIcon.fa_icon' => 'Icona',
 ];
