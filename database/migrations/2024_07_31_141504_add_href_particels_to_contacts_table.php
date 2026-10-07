@@ -24,7 +24,7 @@ return new class extends Migration
     {
         Schema::table(config('contacts.models.contacttype.table'), function (Blueprint $table) {
 			$table->dropColumn('href_string');
-			$table->dropColumn('fa_icon', 32);
+				$table->dropColumn('fa_icon');
         });
     }
 };
