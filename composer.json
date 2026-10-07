@@ -1,6 +1,6 @@
 {
     "name": "ilbronza/contacts",
-    "description": ":package_description",
+    "description": "Polymorphic contacts, contact types and Laravel CRUD integrations.",
     "license": "MIT",
     "authors": [
         {
@@ -10,10 +10,29 @@
         }
     ],
     "homepage": "https://github.com/ilbronza/contacts",
-    "keywords": ["Laravel", "Contacts"],
+    "keywords": [
+        "Laravel",
+        "Contacts"
+    ],
     "require": {
+        "php": "^8.2",
+        "laravel/framework": "^11.0 || ^12.0",
+        "ilbronza/crud": "dev-master",
+        "ilbronza/buttons": "dev-master",
+        "ilbronza/datatables": "dev-master",
+        "ilbronza/form": "dev-master",
+        "ilbronza/uikittemplate": "dev-master",
+        "ilbronza/menu": "dev-main",
+        "ilbronza/accountmanager": "dev-master",
+        "ilbronza/formfield": "dev-master",
+        "ilbronza/ukn": "dev-master",
+        "spatie/laravel-permission": "^6.0",
+        "spatie/laravel-activitylog": "^4.0",
+        "spatie/laravel-medialibrary": "^11.0"
     },
     "require-dev": {
+        "orchestra/testbench": "^9.0 || ^10.0",
+        "phpunit/phpunit": "^11.5"
     },
     "autoload": {
         "psr-4": {
@@ -22,7 +41,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "IlBronza\\Contacts\\Tests\\": "tests"
+            "IlBronza\\Contacts\\Tests\\": "tests/",
+            "App\\": "tests/Fixtures/App/"
         }
     },
     "extra": {
@@ -34,5 +54,14 @@
                 "Contacts": "IlBronza\\Contacts\\Facades\\Contacts"
             }
         }
-    }
+    },
+    "suggest": {
+        "ilbronza/clients": "Enables the default Client contact owner.",
+        "ilbronza/operators": "Enables the default Operator contact owner."
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
