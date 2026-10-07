@@ -40,13 +40,13 @@
                     @endif
                 </td>
                 <td>
-                    @if($type?->hasHref())
-                        <a class="uk-text-truncate" href="{{ $type->getHrefString() }}:{{ $contact->getContact() }}" target="_blank">
+                    @if($href = $contact->getHref())
+                        <a class="uk-text-truncate" href="{{ $href }}" target="_blank" rel="noopener noreferrer">
                     @endif
 
                     {{ $contact->getContact() }}
 
-                    @if($contact->getType()?->hasHref())
+                    @if($href)
                         </a>
                     @endif
                 </td>
@@ -57,4 +57,3 @@
 @endif
 
 {!! IlBronza\Contacts\Helpers\ContactCreatorHelper::getCreateContactButtonByModel($model)->render() !!}
-

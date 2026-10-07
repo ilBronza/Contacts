@@ -13,8 +13,8 @@ class ContacttypeFieldsetsParameters extends FieldsetParametersFile
                 'translationPrefix' => 'contacts',
                 'fields' => [
 					'name' => ['text' => 'string|required|max:191'],
-					'href_string' => ['text' => 'string|nullable|max:255'],
-					'fa_icon' => ['text' => 'string|nullable|max:32'],
+					'href_string' => ['text' => 'string|nullable|in:' . implode(',', config('contacts.allowedHrefSchemes', ['mailto', 'tel', 'sms', 'http', 'https']))],
+					'fa_icon' => ['text' => 'nullable|string|max:32|regex:/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/i'],
                 ],
                 'width' => ['1-2@m']
             ]

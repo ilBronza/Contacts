@@ -27,18 +27,16 @@ class DatatableFieldContacts extends DatatableField
 			$contacttype = $contact->getContacttype();
 			$contactString = $contact->getContact();
 
-			if (! $contacttype || ! $contactString)
+			if (! $contacttype || $contactString === null || $contactString === '')
 				continue;
 
 			$attributes = $this->getTooltipAttributes($contactString);
 			$icon = preg_replace('/\s+title=(["\']).*?\1/i', '', $contacttype->getIcon());
 			$icon = '<span ' . $attributes . '>' . $icon . '</span>';
 
-			if ($contacttype->hasHref())
+			if ($href = $contact->getHref())
 			{
-				$href = $contacttype->getHrefString() . ':' . $contactString;
-
-				$result[] = '<a href="' . e($href) . '" target="_blank">' . $icon . '</a>';
+				$result[] = '<a href="' . e($href) . '" target="_blank" rel="noopener noreferrer">' . $icon . '</a>';
 				continue;
 			}
 
@@ -50,11 +48,12 @@ class DatatableFieldContacts extends DatatableField
 
 	protected function getTooltipAttributes(string $contactString) : string
 	{
-		$tooltip = 'title: ' . e($contactString);
+		$options = ['title' => e($contactString)];
 
 		if ($tooltipClass = trim((string) $this->tooltipClass))
-			$tooltip .= '; cls: uk-active ' . e($tooltipClass);
+			$options['cls'] = 'uk-active ' . $tooltipClass;
 
-		return 'uk-tooltip="' . $tooltip . '"';
+        // UIkit renders the title as HTML: escape the title, then the JSON attribute.
+		return 'uk-tooltip="' . e(json_encode($options, JSON_THROW_ON_ERROR | JSON_INVALID_UTF8_SUBSTITUTE)) . '"';
 	}
 }

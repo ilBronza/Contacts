@@ -1,13 +1,14 @@
-@if($contact->getContacttype()?->hasHref())
-    <a href="{{ $contact->getContacttype()->getHrefString() }}:{{ $contact->getContact() }}" target="_blank">
-        @endif
+@php($href = $contact->getHref())
+@if($href)
+    <a href="{{ $href }}" target="_blank" rel="noopener noreferrer">
+@endif
 
-        @if($contact->getContacttype())
-            {!! $contact->getContacttype()->getIcon() !!}
-        @endif
+@if($type = $contact->getContacttype())
+    {!! $type->getIcon() !!}
+@endif
 
-        {{ $contact->getContact() }}
+{{ $contact->getContact() }}
 
-        @if($contact->getContacttype()?->hasHref())
+@if($href)
     </a>
 @endif
