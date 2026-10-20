@@ -45,6 +45,9 @@ return [
     'allowedHrefSchemes' => ['mailto', 'tel', 'sms', 'http', 'https'],
 
     'emailVerification' => [
+        'email' => [
+            'expires_days' => 7,
+        ],
         'verifalia' => [
             'username' => env('CONTACTS_VERIFALIA_USERNAME'),
             'password' => env('CONTACTS_VERIFALIA_PASSWORD'),

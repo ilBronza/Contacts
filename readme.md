@@ -159,7 +159,8 @@ greylisting, timeout della verifica, classificazioni personalizzate e codici
 sconosciuti non confermano la casella e producono `null`. La classificazione
 `Deliverable` da sola non basta, perché può essere personalizzata sul provider.
 Il risultato è la valutazione del servizio, non una conferma del possesso della
-casella da parte del contatto. Questa modalità non invia email di conferma.
+casella da parte del contatto. Questa modalità non invia email di conferma;
+per la conferma tramite link usare la modalità descritta di seguito.
 
 Verifalia può completare il controllo subito oppure lasciarlo in lavorazione.
 Ogni chiamata attende fino a 30 secondi lato API, con timeout HTTP di 35 secondi.
@@ -196,6 +197,70 @@ Per un altro provider, implementare `IlBronza\Contacts\Contracts\EmailExistenceV
 e sostituirne il binding nel service provider dell'applicazione. I test simulano
 le risposte HTTP: non inviano contatti reali e non consumano crediti.
 
+### Conferma diretta tramite email
+
+In alternativa a Verifalia, è possibile inviare un'email al contatto e considerare
+verificato l'indirizzo quando viene aperto il link. Questa modalità usa il mailer
+Laravel dell'applicazione e non richiede credenziali Verifalia.
+
+```php
+use IlBronza\Contacts\Models\Contact;
+use IlBronza\Contacts\Helpers\ContactEmailVerificationHelper;
+
+$contact = Contact::findOrFail(123);
+app(ContactEmailVerificationHelper::class)->sendVerificationEmail($contact);
+```
+
+Il messaggio standard contiene il link, un testo in italiano o inglese secondo il
+locale dell'applicazione, e la durata della validità. L'invio è sincrono: un errore
+del mailer viene propagato al chiamante. Per inviare dalla coda, richiamare il metodo
+in un job dell'applicazione. L'invio o la sola generazione del link non modificano
+`existence_verified`; il click imposta il campo a `true` e consuma il token.
+
+Per inserire il link nel **vostro testo email**, generarlo senza inviare il messaggio
+standard e passarlo alla vostra mail:
+
+```php
+$verificationUrl = app(ContactEmailVerificationHelper::class)
+    ->createVerificationUrl($contact);
+
+// Passare $verificationUrl alla propria Mailable o vista email.
+```
+
+Nel vostro template Blade:
+
+```blade
+<a href="{{ $verificationUrl }}">Conferma il tuo indirizzo email</a>
+```
+
+Il template standard è `contacts::emails.verify-contact` (HTML) e
+`contacts::emails.verify-contact-text` (testo semplice). Per personalizzarlo
+nell'applicazione, creare gli override sotto
+`resources/views/vendor/contacts/emails/`. Entrambe le viste ricevono
+`$verificationUrl` e `$expiresInDays`.
+
+Il link è firmato, monouso e valido per **7 giorni** per impostazione predefinita.
+La durata è configurabile in `contacts.emailVerification.email.expires_days`,
+ad esempio `14` per due settimane. Generare un nuovo link revoca quello precedente;
+cambiare recapito o tipo tramite modello revoca i link pendenti anche con
+`saveQuietly()`. Il token memorizzato è soltanto un hash, nascosto dalla
+serializzazione del modello e legato all'indirizzo e al tipo esatti.
+
+Il destinatario non deve avere un account: la route pubblica
+`GET /contact-management/email-verification/{contact}/{token}` verifica firma,
+scadenza e token, quindi mostra la conferma. Link scaduti, alterati, sostituiti o
+già usati restituiscono 403; un contatto eliminato restituisce 404. Le richieste
+HEAD non consumano il token. La pagina di conferma si può personalizzare tramite
+`resources/views/vendor/contacts/contacts/email-verified.blade.php`.
+
+Configurare `APP_URL` con l'URL pubblico corretto e il mailer Laravel (`MAIL_*`),
+eseguire `php artisan migrate` per aggiungere `email_verification_token_hash`,
+e aggiornare l'eventuale configurazione pubblicata e la cache di configurazione.
+L'invio è disponibile soltanto come helper: autorizzazioni e limiti di invio
+vanno applicati dal chiamante, come per le altre operazioni dirette sui contatti.
+Gli aggiornamenti SQL diretti devono azzerare sia `existence_verified` sia
+`email_verification_token_hash`. I test usano mail simulate e non inviano messaggi reali.
+
 ## Tipi, icone e link
 
 `Contacttype` usa `slug` come chiave primaria. I campi aggiuntivi sono:
@@ -226,9 +291,10 @@ L'indice dei tipi carica anche `contacts_count`.
 
 ## Route e permessi
 
-Tutte le route sotto `/contact-management` richiedono `web`, `auth` e `contacts.roles`.
+Le route di gestione sotto `/contact-management` richiedono `web`, `auth` e `contacts.roles`.
 I ruoli predefiniti sono `administrator`, `superadmin`, `contacts`; si possono
-configurare `defaultRoles` e `routeRoles`. Il prefisso dei nomi delle route è quello
+configurare `defaultRoles` e `routeRoles`. Fa eccezione la conferma email pubblica, protetta
+da firma, scadenza, token monouso e limite di richieste. Il prefisso dei nomi delle route è quello
 esistente (`contacts`), senza aggiungere un punto durante l'aggiornamento.
 
 | Operazione | Route |
@@ -252,9 +318,9 @@ nel servizio chiamante, come gli altri metodi Eloquent.
 - Verificare che chi crea contatti abbia un ruolo consentito e possa aggiornare
   il proprietario; le due route di creazione ora applicano entrambi i controlli.
 - Correggere eventuali icone o protocolli non validi; il rendering li tratta in modo sicuro.
-- Eseguire `php artisan migrate` per aggiungere `existence_verified` alla tabella
-  contatti configurata. Le righe esistenti partono da `false`; nessuna verifica
-  esterna viene eseguita dalla migrazione.
+- Eseguire `php artisan migrate` per aggiungere `existence_verified` e
+  `email_verification_token_hash` alla tabella contatti configurata. Le righe esistenti partono da `false`; nessuna verifica esterna
+  viene eseguita dalla migrazione.
 - I recapiti precedentemente assegnati al proprietario sbagliato non vengono
   ricostruiti automaticamente: manca lo storico per stabilire l'associazione originale.
 
@@ -277,8 +343,9 @@ working copy dei package. Manifest e viste compilate dei test vengono scritti
 nella directory temporanea. Non occorre modificare il vendor condiviso.
 
 La suite verifica persistenza, isolamento dei proprietari, normalizzazione,
-validazione, verifica della casella con API simulata, invalidazione del flag,
-permessi HTTP, rendering e rollback delle migrazioni. Usa SQLite in
+validazione, verifica della casella con API simulata, conferma tramite email,
+scadenza e revoca dei link, invalidazione del flag, permessi HTTP, rendering e
+rollback delle migrazioni. Usa SQLite in
 memoria e non usa `RefreshDatabase`, per compatibilità con l'ambiente php-wasm.
 
 ## Licenza

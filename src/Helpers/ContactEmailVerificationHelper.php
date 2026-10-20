@@ -12,6 +12,16 @@ class ContactEmailVerificationHelper
 {
     public function __construct(protected EmailExistenceVerifier $verifier) {}
 
+    public function sendVerificationEmail(Contact $contact): void
+    {
+        app(ContactEmailConfirmationHelper::class)->send($contact);
+    }
+
+    public function createVerificationUrl(Contact $contact): string
+    {
+        return app(ContactEmailConfirmationHelper::class)->createVerificationUrl($contact);
+    }
+
     /**
      * Check the individual mailbox through the provider, without saving.
      * Null means that the provider cannot determine whether it exists.

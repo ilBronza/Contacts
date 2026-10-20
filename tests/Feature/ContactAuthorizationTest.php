@@ -6,15 +6,24 @@ use IlBronza\Contacts\Models\Contact;
 use IlBronza\Contacts\Tests\Fixtures\Models\Owner;
 use IlBronza\Contacts\Tests\TestCase;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Routing\Middleware\ValidateSignature;
 
 class ContactAuthorizationTest extends TestCase
 {
-    public function test_all_contact_routes_require_package_roles(): void
+    public function test_management_routes_require_roles_and_confirmation_requires_a_signature(): void
     {
         $routes = collect(Route::getRoutes())->filter(fn ($route) => str_starts_with($route->uri(), 'contact-management/'));
         $this->assertNotEmpty($routes);
-        foreach ($routes as $route)
+        foreach ($routes as $route) {
+            if ($route->getName() === config('contacts.routePrefix') . '.email.verify') {
+                $this->assertContains(ValidateSignature::class, $route->middleware());
+                $this->assertContains('throttle:30,1', $route->middleware());
+                $this->assertNotContains('auth', $route->middleware());
+                continue;
+            }
+
             $this->assertContains('contacts.roles', $route->middleware(), $route->uri());
+        }
     }
 
     public function test_authenticated_user_without_package_role_cannot_create_or_store(): void

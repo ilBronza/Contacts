@@ -27,6 +27,8 @@ class Contact extends PackagedBaseModel
         'existence_verified' => 'boolean',
     ];
 
+    protected $hidden = ['email_verification_token_hash'];
+
 	public function contacttype()
 	{
 		return $this->belongsTo(Contacttype::getProjectClassName());
@@ -92,6 +94,7 @@ class Contact extends PackagedBaseModel
         // A verification belongs to the normalized address and its contact type.
         if (! $this->exists || $this->isDirty(['contact', 'contacttype_slug'])) {
             $this->existence_verified = false;
+            $this->email_verification_token_hash = null;
         }
 
         return parent::save($options);

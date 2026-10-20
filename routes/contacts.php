@@ -1,7 +1,14 @@
 <?php
 
 use IlBronza\Contacts\Contacts;
+use IlBronza\Contacts\Http\Controllers\Contacts\ContactEmailVerificationController;
+use Illuminate\Routing\Middleware\ValidateSignature;
 use Illuminate\Support\Facades\Route;
+
+// Recipients may confirm their address without an application account.
+Route::get('contact-management/email-verification/{contact}/{token}', ContactEmailVerificationController::class)
+    ->middleware(['web', ValidateSignature::class, 'throttle:30,1'])
+    ->name(config('contacts.routePrefix') . '.email.verify');
 
 Route::group([
 	'middleware' => ['web', 'auth', 'contacts.roles'],
