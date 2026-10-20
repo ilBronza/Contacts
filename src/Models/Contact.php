@@ -18,6 +18,15 @@ class Contact extends PackagedBaseModel
 	static $packageConfigPrefix = 'contacts';
 	static $modelConfigPrefix = 'contact';
 
+    protected $attributes = [
+        'existence_verified' => false,
+    ];
+
+    protected $casts = [
+        'deleted_at' => 'datetime',
+        'existence_verified' => 'boolean',
+    ];
+
 	public function contacttype()
 	{
 		return $this->belongsTo(Contacttype::getProjectClassName());
@@ -79,6 +88,11 @@ class Contact extends PackagedBaseModel
 
         if (! $this->exists || $this->isDirty(['contact', 'contacttype_slug']))
             $this->contact = Contacts::normalizeAndValidateContact($this->contact, $this->contacttype_slug);
+
+        // A verification belongs to the normalized address and its contact type.
+        if (! $this->exists || $this->isDirty(['contact', 'contacttype_slug'])) {
+            $this->existence_verified = false;
+        }
 
         return parent::save($options);
     }

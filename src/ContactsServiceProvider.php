@@ -2,7 +2,9 @@
 
 namespace IlBronza\Contacts;
 
+use IlBronza\Contacts\Contracts\EmailExistenceVerifier;
 use IlBronza\Contacts\Http\Middleware\ContactsMiddlewareRolesPermissions;
+use IlBronza\Contacts\Support\VerifaliaEmailExistenceVerifier;
 use IlBronza\CRUD\Traits\IlBronzaPackages\IlBronzaServiceProviderPackagesTrait;
 use Illuminate\Support\ServiceProvider;
 
@@ -38,6 +40,8 @@ class ContactsServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../config/contacts.php', 'contacts');
+
+        $this->app->bind(EmailExistenceVerifier::class, VerifaliaEmailExistenceVerifier::class);
 
         // Register the service the package provides.
         $this->app->singleton('contacts', function ($app) {

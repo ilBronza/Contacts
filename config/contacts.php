@@ -44,6 +44,13 @@ return [
 
     'allowedHrefSchemes' => ['mailto', 'tel', 'sms', 'http', 'https'],
 
+    'emailVerification' => [
+        'verifalia' => [
+            'username' => env('CONTACTS_VERIFALIA_USERNAME'),
+            'password' => env('CONTACTS_VERIFALIA_PASSWORD'),
+        ],
+    ],
+
     // Keys are contact type slugs. Unlisted types receive trimming and basic string validation.
     'contactTypes' => [
         'email' => [

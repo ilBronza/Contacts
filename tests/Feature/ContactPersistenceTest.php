@@ -11,6 +11,56 @@ use Illuminate\Validation\ValidationException;
 
 class ContactPersistenceTest extends TestCase
 {
+    public function test_contacts_are_unverified_by_default_and_cast_the_flag_to_boolean(): void
+    {
+        $this->assertFalse((new Contact)->existence_verified);
+        $contact = Owner::create()->addContact('person@example.com', 'email');
+        $this->assertFalse($contact->existence_verified);
+        $this->assertFalse($contact->fresh()->existence_verified);
+
+        $contact->existence_verified = true;
+        $contact->save();
+        $this->assertTrue($contact->fresh()->existence_verified);
+    }
+
+    public function test_changing_email_resets_verification_even_with_quiet_save(): void
+    {
+        $contact = Owner::create()->addContact('person@example.com', 'email');
+
+        foreach (['save', 'saveQuietly'] as $index => $method) {
+            $contact->existence_verified = true;
+            $contact->save();
+            $contact->contact = 'other' . $index . '@example.com';
+            $contact->$method();
+            $this->assertFalse($contact->fresh()->existence_verified);
+        }
+    }
+
+    public function test_changing_contact_type_resets_verification(): void
+    {
+        $owner = Owner::create();
+        $contact = $owner->addContact('person@example.com', 'email');
+        $otherType = $owner->addContact('person@example.com', 'other')->contacttype_slug;
+        $contact->existence_verified = true;
+        $contact->save();
+        $contact->contacttype_slug = $otherType;
+        $contact->save();
+        $this->assertFalse($contact->fresh()->existence_verified);
+    }
+
+    public function test_equivalent_email_and_unrelated_updates_preserve_verification(): void
+    {
+        $owner = Owner::create();
+        $contact = $owner->addContact('Person@example.com', 'email');
+        $contact->existence_verified = true;
+        $contact->save();
+        $contact->contact = ' Person@EXAMPLE.COM ';
+        $contact->sorting_index = 2;
+        $contact->save();
+        $this->assertTrue($contact->fresh()->existence_verified);
+        $this->assertTrue($owner->addContact('Person@example.com', 'email')->existence_verified);
+    }
+
     public function test_shared_address_does_not_move_between_owners(): void
     {
         $first = Owner::create();

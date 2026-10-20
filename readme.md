@@ -117,6 +117,85 @@ Contacts::normalizeAndValidateContact(' Nome@EXAMPLE.COM ', 'email');
 L'estrattore email cerca candidati non racchiusi in doppi apici, supporta sottodomini,
 TLD lunghi e tag `+`, e scarta i candidati non validi senza troncarne il dominio.
 
+### Verifica della singola casella email con Verifalia
+
+`ContactEmailVerificationHelper` verifica la singola casella tramite Verifalia.
+Il controllo del solo formato o del DNS non imposta `existence_verified` a `true`.
+Sono supportati il tipo `email` e quelli configurati con `normalizer => 'email'`,
+ad esempio `pec`; altri tipi o indirizzi sintatticamente non validi producono
+`false` senza contattare il servizio.
+
+Configurare nell'applicazione ospite le credenziali di un utente API Verifalia:
+
+```dotenv
+CONTACTS_VERIFALIA_USERNAME=nome_utente_api
+CONTACTS_VERIFALIA_PASSWORD=password_utente_api
+```
+
+Le credenziali sono lette da `contacts.emailVerification.verifalia`. Se la
+configurazione del package è già pubblicata, aggiungervi questa sezione da
+`config/contacts.php`; rigenerare l'eventuale cache di configurazione Laravel.
+Il provider usa l'API v2.7 via HTTPS con autenticazione Basic e qualità `Standard`.
+Il piano gratuito include 25 crediti giornalieri, non cumulabili; una verifica
+standard usa un credito. Sono necessari un account e le credenziali API, che non
+vanno inserite nel repository. Riferimenti:
+[configurazione API](https://verifalia.com/developers/authentication) e
+[crediti gratuiti](https://verifalia.com/help/billing-pricing/how-do-daily-free-credits-work).
+
+```php
+use IlBronza\Contacts\Helpers\ContactEmailVerificationHelper;
+
+$contact = $customer->addContact('Mario@example.com', 'email');
+$result = app(ContactEmailVerificationHelper::class)->verify($contact);
+
+// true: casella confermata, existence_verified = true.
+// false: indirizzo non valido, existence_verified = false.
+// null: controllo in corso o esito incerto, existence_verified = false.
+```
+
+Con questa modalità il flag diventa `true` solo per l'esito Verifalia `Success` / `Deliverable` della
+stessa email inviata. Un dominio che accetta qualsiasi destinatario (catch-all),
+greylisting, timeout della verifica, classificazioni personalizzate e codici
+sconosciuti non confermano la casella e producono `null`. La classificazione
+`Deliverable` da sola non basta, perché può essere personalizzata sul provider.
+Il risultato è la valutazione del servizio, non una conferma del possesso della
+casella da parte del contatto. Questa modalità non invia email di conferma.
+
+Verifalia può completare il controllo subito oppure lasciarlo in lavorazione.
+Ogni chiamata attende fino a 30 secondi lato API, con timeout HTTP di 35 secondi.
+Quando il lavoro è ancora in corso, il suo ID viene conservato nella cache Laravel
+per 24 ore: richiamando `verify()` sulla stessa email si recupera quel lavoro con
+una GET, senza inviare nuovamente la casella. Utilizzare una cache persistente
+con supporto ai lock, condivisa tra i worker. I risultati completati non vengono
+messi in cache: una verifica successiva avvia un nuovo controllo e usa un credito.
+Un job dell'applicazione ospite può richiamare l'helper per recuperare un lavoro
+ancora in corso; il package non configura invii, code o pianificazioni automatiche.
+
+`isValid($contact)` esegue lo stesso controllo senza scrivere sul modello e
+funziona anche su contatti non salvati; può comunque consumare un credito.
+`verify()` richiede un contatto persistito senza modifiche pendenti a recapito o
+tipo. Aggiorna solo il flag e il timestamp, senza salvare altri campi pendenti né
+emettere eventi Eloquent. Se il contatto cambia o viene eliminato durante la
+richiesta, il risultato non viene applicato e viene sollevata una `RuntimeException`.
+
+Credenziali mancanti producono una `LogicException`; errori HTTP, quota esaurita,
+problemi di connessione e risposte malformate producono una `RuntimeException`,
+senza modificare la verifica precedente. Non vengono effettuati retry HTTP
+automatici; un errore durante il recupero conserva l'ID del lavoro per un nuovo
+tentativo. Se una POST fallisce prima di restituire l'ID, non è possibile sapere
+se il servizio l'abbia già accettata: consultare Verifalia prima di reinviarla.
+
+La colonna `existence_verified` è booleana, non nullable e inizializzata a `false`,
+anche sulle righe esistenti. Cambiare recapito normalizzato o tipo azzera il flag,
+anche con `saveQuietly()`; modifiche non pertinenti o un indirizzo equivalente dopo
+la normalizzazione conservano la verifica. Gli aggiornamenti SQL diretti devono
+azzerare il flag nel chiamante. Il salvataggio ordinario continua a validare il
+formato senza chiamare servizi esterni.
+
+Per un altro provider, implementare `IlBronza\Contacts\Contracts\EmailExistenceVerifier`
+e sostituirne il binding nel service provider dell'applicazione. I test simulano
+le risposte HTTP: non inviano contatti reali e non consumano crediti.
+
 ## Tipi, icone e link
 
 `Contacttype` usa `slug` come chiave primaria. I campi aggiuntivi sono:
@@ -173,7 +252,9 @@ nel servizio chiamante, come gli altri metodi Eloquent.
 - Verificare che chi crea contatti abbia un ruolo consentito e possa aggiornare
   il proprietario; le due route di creazione ora applicano entrambi i controlli.
 - Correggere eventuali icone o protocolli non validi; il rendering li tratta in modo sicuro.
-- Non serve una nuova migrazione: la correzione riguarda il `down()` di quella esistente.
+- Eseguire `php artisan migrate` per aggiungere `existence_verified` alla tabella
+  contatti configurata. Le righe esistenti partono da `false`; nessuna verifica
+  esterna viene eseguita dalla migrazione.
 - I recapiti precedentemente assegnati al proprietario sbagliato non vengono
   ricostruiti automaticamente: manca lo storico per stabilire l'associazione originale.
 
@@ -196,7 +277,8 @@ working copy dei package. Manifest e viste compilate dei test vengono scritti
 nella directory temporanea. Non occorre modificare il vendor condiviso.
 
 La suite verifica persistenza, isolamento dei proprietari, normalizzazione,
-validazione, permessi HTTP, rendering e rollback delle migrazioni. Usa SQLite in
+validazione, verifica della casella con API simulata, invalidazione del flag,
+permessi HTTP, rendering e rollback delle migrazioni. Usa SQLite in
 memoria e non usa `RefreshDatabase`, per compatibilità con l'ambiente php-wasm.
 
 ## Licenza
