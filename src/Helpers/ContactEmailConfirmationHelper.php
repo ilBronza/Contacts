@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use LogicException;
 use RuntimeException;
+use Throwable;
 
 class ContactEmailConfirmationHelper
 {
@@ -17,8 +18,56 @@ class ContactEmailConfirmationHelper
     {
         $url = $this->createVerificationUrl($contact);
 
-        Mail::to(Contacts::normalizeContact((string) $contact->getContact(), 'email'))
-            ->send(new ContactEmailVerificationMail($url, $this->expiresInDays()));
+        $this->sendMail($contact, $url);
+    }
+
+    /** Atomically skip verified contacts and links already awaiting confirmation. */
+    public function sendIfNeeded(Contact $contact): bool
+    {
+        if (! $contact->exists || $contact->isDirty(['contact', 'contacttype_slug']))
+            throw new LogicException('Save the contact and its email address before requesting confirmation.');
+
+        $delivery = $contact->getConnection()->transaction(function () use ($contact) {
+            $current = $contact->newQuery()->whereKey($contact->getKey())->lockForUpdate()->first();
+
+            if (! $current
+                || $current->getRawOriginal('contact') !== $contact->getRawOriginal('contact')
+                || $current->getRawOriginal('contacttype_slug') !== $contact->getRawOriginal('contacttype_slug')
+                || $current->existence_verified
+                || ! $this->isEmailContact($current))
+                return null;
+
+            // Legacy tokens without a stored expiry must not be silently revoked.
+            if ($current->email_verification_token_hash !== null
+                && ($current->email_verification_expires_at === null
+                    || $current->email_verification_expires_at->timestamp >= now()->timestamp))
+                return null;
+
+            return [$current, $this->createVerificationUrl($current)];
+        });
+
+        if ($delivery === null)
+            return false;
+
+        // Release the database lock before contacting the mail transport.
+        $this->sendMail(...$delivery);
+
+        return true;
+    }
+
+    private function sendMail(Contact $contact, string $url): void
+    {
+        try {
+            Mail::to(Contacts::normalizeContact((string) $contact->getContact(), 'email'))
+                ->send(new ContactEmailVerificationMail($url, $this->expiresInDays()));
+        } catch (Throwable $exception) {
+            // Allow another attempt without clearing a newer token issued concurrently.
+            $contact->newQuery()->whereKey($contact->getKey())
+                ->where('email_verification_token_hash', $contact->email_verification_token_hash)
+                ->update(['email_verification_token_hash' => null, 'email_verification_expires_at' => null]);
+
+            throw $exception;
+        }
     }
 
     /** Create a new one-use link, revoking any previously issued link. */
@@ -31,13 +80,14 @@ class ContactEmailConfirmationHelper
             throw new LogicException('Only contacts with a valid email address can receive a confirmation link.');
 
         $token = bin2hex(random_bytes(32));
+        $expiresAt = now()->addDays($this->expiresInDays());
         $url = URL::temporarySignedRoute(
             config('contacts.routePrefix') . '.email.verify',
-            now()->addDays($this->expiresInDays()),
+            $expiresAt,
             ['contact' => $contact->getKey(), 'token' => $token],
         );
 
-        $hash = $contact->getConnection()->transaction(function () use ($contact, $token) {
+        $hash = $contact->getConnection()->transaction(function () use ($contact, $token, $expiresAt) {
             $current = $contact->newQuery()->whereKey($contact->getKey())->lockForUpdate()->first();
 
             if (! $current
@@ -46,13 +96,18 @@ class ContactEmailConfirmationHelper
                 throw new RuntimeException('The contact changed or was deleted. Reload it before requesting confirmation.');
 
             $hash = $this->tokenHash($current, $token);
-            $current->newQuery()->whereKey($current->getKey())->update(['email_verification_token_hash' => $hash]);
+            $current->newQuery()->whereKey($current->getKey())->update([
+                'email_verification_token_hash' => $hash,
+                'email_verification_expires_at' => $expiresAt,
+            ]);
 
             return $hash;
         });
 
         $contact->email_verification_token_hash = $hash;
         $contact->syncOriginalAttribute('email_verification_token_hash');
+        $contact->email_verification_expires_at = $expiresAt;
+        $contact->syncOriginalAttribute('email_verification_expires_at');
 
         return $url;
     }
@@ -76,6 +131,7 @@ class ContactEmailConfirmationHelper
             $contact->newQuery()->whereKey($contact->getKey())->update([
                 'existence_verified' => true,
                 'email_verification_token_hash' => null,
+                'email_verification_expires_at' => null,
             ]);
 
             return $contact->refresh();
@@ -88,7 +144,7 @@ class ContactEmailConfirmationHelper
         return hash('sha256', $token . "\0" . $contact->getRawOriginal('contact') . "\0" . $contact->getRawOriginal('contacttype_slug'));
     }
 
-    private function isEmailContact(Contact $contact): bool
+    public function isEmailContact(Contact $contact): bool
     {
         $type = $contact->contacttype_slug;
 

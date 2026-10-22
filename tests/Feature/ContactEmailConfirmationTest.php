@@ -46,12 +46,14 @@ class ContactEmailConfirmationTest extends TestCase
         $this->assertArrayNotHasKey('email_verification_token_hash', $contact->fresh()->toArray());
         parse_str(parse_url($mail->verificationUrl, PHP_URL_QUERY), $query);
         $this->assertSame(now()->addDays(7)->timestamp, (int) $query['expires']);
+        $this->assertSame((int) $query['expires'], $contact->fresh()->email_verification_expires_at->timestamp);
 
         $this->travel(6)->days();
         $this->get($mail->verificationUrl)->assertOk()->assertSee('Indirizzo email verificato')
             ->assertHeader('Referrer-Policy', 'no-referrer');
         $this->assertTrue($contact->fresh()->existence_verified);
         $this->assertNull($contact->fresh()->email_verification_token_hash);
+        $this->assertNull($contact->fresh()->email_verification_expires_at);
         Http::assertNothingSent();
     }
 
@@ -162,6 +164,7 @@ class ContactEmailConfirmationTest extends TestCase
         $contact->saveQuietly();
 
         $this->assertNull($contact->fresh()->email_verification_token_hash);
+        $this->assertNull($contact->fresh()->email_verification_expires_at);
         $this->get($url)->assertForbidden();
         $this->assertFalse($contact->fresh()->existence_verified);
     }

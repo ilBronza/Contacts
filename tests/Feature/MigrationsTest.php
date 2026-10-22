@@ -20,6 +20,7 @@ class MigrationsTest extends TestCase
         $this->assertTrue(Schema::hasTable('contacts__contacts'));
         $this->assertTrue(Schema::hasColumn('contacts__contacts', 'existence_verified'));
         $this->assertTrue(Schema::hasColumn('contacts__contacts', 'email_verification_token_hash'));
+        $this->assertTrue(Schema::hasColumn('contacts__contacts', 'email_verification_expires_at'));
     }
 
     public function test_existing_contacts_start_unverified_when_the_column_is_added(): void

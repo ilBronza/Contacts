@@ -213,9 +213,11 @@ app(ContactEmailVerificationHelper::class)->sendVerificationEmail($contact);
 
 Il messaggio standard contiene il link, un testo in italiano o inglese secondo il
 locale dell'applicazione, e la durata della validità. L'invio è sincrono: un errore
-del mailer viene propagato al chiamante. Per inviare dalla coda, richiamare il metodo
-in un job dell'applicazione. L'invio o la sola generazione del link non modificano
+del mailer viene propagato al chiamante. Per inviare dalla coda è disponibile il
+job descritto sotto. L'invio o la sola generazione del link non modificano
 `existence_verified`; il click imposta il campo a `true` e consuma il token.
+Senza click il contatto resta non verificato, anche dopo la scadenza: questo non
+significa che la casella sia non valida.
 
 Per inserire il link nel **vostro testo email**, generarlo senza inviare il messaggio
 standard e passarlo alla vostra mail:
@@ -254,12 +256,111 @@ HEAD non consumano il token. La pagina di conferma si può personalizzare tramit
 `resources/views/vendor/contacts/contacts/email-verified.blade.php`.
 
 Configurare `APP_URL` con l'URL pubblico corretto e il mailer Laravel (`MAIL_*`),
-eseguire `php artisan migrate` per aggiungere `email_verification_token_hash`,
+eseguire `php artisan migrate` per aggiungere le colonne della verifica email,
 e aggiornare l'eventuale configurazione pubblicata e la cache di configurazione.
-L'invio è disponibile soltanto come helper: autorizzazioni e limiti di invio
-vanno applicati dal chiamante, come per le altre operazioni dirette sui contatti.
+Per le chiamate dirette all'helper, autorizzazioni e limiti di invio vanno
+applicati dal chiamante, come per le altre operazioni dirette sui contatti.
 Gli aggiornamenti SQL diretti devono azzerare sia `existence_verified` sia
-`email_verification_token_hash`. I test usano mail simulate e non inviano messaggi reali.
+`email_verification_token_hash` e `email_verification_expires_at`.
+I test usano mail simulate e non inviano messaggi reali.
+
+### Comando per inviare piccoli gruppi di conferme
+
+Il comando usa la conferma tramite link e non chiama Verifalia:
+
+```bash
+# Al massimo 10 contatti per esecuzione (valore predefinito).
+php artisan contacts:send-email-verifications
+
+# Un gruppo più piccolo oppure un singolo contatto.
+php artisan contacts:send-email-verifications --limit=5
+php artisan contacts:send-email-verifications 123
+```
+
+`--limit` accetta interi da **1 a 25** e limita i tentativi di invio o accodamento
+di ogni esecuzione, inclusi quelli falliti; non è una quota giornaliera.
+Il comando seleziona per ID i contatti non verificati di tipo `email` o con
+normalizzatore email, rispettando classe del modello, global scope e soft delete
+dell'applicazione. Indirizzi sintatticamente non validi vengono saltati.
+
+Un contatto con un link ancora valido viene escluso. Le esecuzioni successive
+proseguono con gli altri contatti; un link scaduto permette un nuovo invio.
+La scadenza effettiva viene salvata in `email_verification_expires_at`, quindi
+modificare la durata in configurazione non accorcia i link già emessi. I vecchi
+token senza scadenza memorizzata vengono conservati ed esclusi dal comando:
+per rinnovarli esplicitamente usare `sendVerificationEmail($contact)`.
+
+Il comando mostra il numero di invii o job accodati, gli indirizzi saltati durante
+la scansione e gli errori. Restituisce codice `0` anche quando non ci sono contatti
+idonei, `1` in caso di errori di invio/accodamento o ID inesistente, `2` per opzioni
+non valide. Per ogni errore, classe e messaggio dell'eccezione vengono mostrati
+direttamente nel terminale, anche senza `-v`. Il comando scrive inoltre un
+`Log::error()` esplicito con ID del contatto, operazione (`send` o `queue`) ed
+eccezione; le esclusioni dell'exception handler (`dontReport` e simili) non
+sopprimono questo log. Gli altri contatti del gruppo continuano a essere
+elaborati. Un errore del mailer rimuove il token di quel
+tentativo, consentendo di riprovare senza cancellare eventuali link più recenti.
+
+Per mostrare anche il canale log e il percorso della sua configurazione:
+
+```bash
+php artisan contacts:send-email-verifications 123 -v
+```
+
+L'opzione `-v` mostra anche il canale log configurato e il percorso di
+`config/logging.php` dell'applicazione ospite. Il package non crea un file di log
+proprio: con la configurazione Laravel standard il file è
+`storage/logs/laravel.log`, oppure `storage/logs/laravel-YYYY-MM-DD.log` con il
+driver `daily`. Altri canali possono scrivere su stderr, syslog o servizi esterni.
+La configurazione del canale, il suo livello minimo e gli eventuali filtri del
+logger determinano se e dove viene scritto il log di livello `error`. Il dettaglio
+nel terminale resta disponibile anche con un canale che scarta i log. Se il logger
+stesso genera un errore, il comando lo mostra anche senza `-v` e continua il gruppo,
+preservando il dettaglio dell'errore originale. L'opzione `-v` esegue comunque
+l'invio: non è una simulazione.
+
+### Invio facoltativo tramite queue
+
+L'esecuzione predefinita è sincrona e non richiede un worker. Con `--queue` viene
+accodato un `SendContactEmailVerification` per ogni contatto selezionato:
+
+```bash
+php artisan contacts:send-email-verifications --limit=5 --queue
+
+# Connessione e nome coda già configurati nell'applicazione ospite.
+php artisan contacts:send-email-verifications --queue --connection=redis --queue-name=emails
+```
+
+Il package usa i contratti queue Laravel e la connessione predefinita dell'app;
+non impone Redis, database, Horizon o una pianificazione. `--connection` e
+`--queue-name` sono opzionali e richiedono `--queue`. Per un invio asincrono,
+l'applicazione deve configurare la connessione e avviare i relativi worker
+(`php artisan queue:work`, oppure il proprio supervisor). Con una connessione
+`sync` i job partono subito e il comando lo segnala.
+
+Il job è utilizzabile anche direttamente dall'applicazione:
+
+```php
+use IlBronza\Contacts\Jobs\SendContactEmailVerification;
+
+SendContactEmailVerification::dispatch($contact);
+// Oppure: ::dispatch($contact)->onConnection('redis')->onQueue('emails');
+```
+
+Il contatto deve essere già salvato. Il job aspetta il commit di eventuali
+transazioni e genera il link solo all'esecuzione: i giorni di validità decorrono
+da quel momento. Prima di inviare ricontrolla indirizzo, tipo, cancellazione,
+verifica già completata e link pendenti; job duplicati non sostituiscono un link
+ancora valido. Una modifica di indirizzo o tipo rende obsoleto il vecchio job.
+Il controllo e la generazione del token sono protetti da una transazione sul
+contatto; il mailer viene contattato dopo aver rilasciato il lock del database.
+
+Gli errori del job vengono propagati al worker; numero di tentativi, timeout e
+backoff rimangono quelli scelti dall'applicazione. Il conteggio del comando in
+modalità queue indica job accodati, non messaggi già consegnati. Eseguire più volte
+il comando prima che i worker lavorino può accodare duplicati: il controllo al
+momento dell'invio evita di reinviare mentre c'è un link valido.
+Riferimento: [queue Laravel](https://laravel.com/docs/12.x/queues).
 
 ## Tipi, icone e link
 

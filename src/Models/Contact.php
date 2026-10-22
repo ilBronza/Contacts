@@ -25,6 +25,7 @@ class Contact extends PackagedBaseModel
     protected $casts = [
         'deleted_at' => 'datetime',
         'existence_verified' => 'boolean',
+        'email_verification_expires_at' => 'datetime',
     ];
 
     protected $hidden = ['email_verification_token_hash'];
@@ -95,6 +96,7 @@ class Contact extends PackagedBaseModel
         if (! $this->exists || $this->isDirty(['contact', 'contacttype_slug'])) {
             $this->existence_verified = false;
             $this->email_verification_token_hash = null;
+            $this->email_verification_expires_at = null;
         }
 
         return parent::save($options);

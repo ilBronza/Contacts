@@ -2,6 +2,7 @@
 
 namespace IlBronza\Contacts;
 
+use IlBronza\Contacts\Console\Commands\SendEmailVerifications;
 use IlBronza\Contacts\Contracts\EmailExistenceVerifier;
 use IlBronza\Contacts\Http\Middleware\ContactsMiddlewareRolesPermissions;
 use IlBronza\Contacts\Support\VerifaliaEmailExistenceVerifier;
@@ -87,6 +88,6 @@ class ContactsServiceProvider extends ServiceProvider
         ], 'contacts.lang');*/
 
         // Registering package commands.
-        // $this->commands([]);
+        $this->commands([SendEmailVerifications::class]);
     }
 }
