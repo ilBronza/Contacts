@@ -6,9 +6,12 @@ Datatables per email, telefoni e collezioni di icone.
 
 ## Requisiti e installazione
 
-PHP 8.2 o successivo e Laravel 11 o 12. I test locali sono stati eseguiti con
-PHP 8.4, Laravel 11, PHPUnit 11 e SQLite in memoria; Laravel 12 e MySQL non sono
-stati verificati in questa sessione.
+PHP 8.2 o successivo e Laravel, con versione minima dichiarata in Composer.
+
+I vincoli Composer delle dipendenze Laravel e delle relative integrazioni indicano soltanto una versione minima, senza un limite sulle major successive. La scelta delle versioni concrete spetta all’applicazione ospite e al suo `composer.lock`; la compatibilità del codice va verificata con i test.
+
+I test locali usano PHP 8.4, Laravel 11, PHPUnit 11 e SQLite in memoria.
+Questa configurazione non certifica le altre versioni di Laravel o MySQL.
 
 Il package si integra con lo stack IlBronza dichiarato in `composer.json`.
 CRUD richiede un controller `App\Http\Controllers\Controller` nell'applicazione
