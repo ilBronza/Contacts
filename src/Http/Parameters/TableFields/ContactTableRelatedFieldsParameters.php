@@ -15,6 +15,10 @@ class ContactTableRelatedFieldsParameters extends FieldsGroupParametersFile
                 'contactable' => 'relations.BelongsTo',
                 'contacttype' => 'relations.BelongsTo',
                 'contact' => 'flat',
+                'existence_verified' => [
+                    'type' => 'boolean',
+                    'width' => '8em',
+                ],
 
                 'mySelfDelete' => 'links.delete'
             ]
