@@ -267,6 +267,62 @@ class ContactEmailConfirmationTest extends TestCase
         $this->assertFalse($contact->fresh()->existence_verified);
     }
 
+    public function test_branded_email_embeds_its_local_logo_and_keeps_working_links_in_both_parts(): void
+    {
+        app()->setLocale('it');
+        $logo = tempnam(sys_get_temp_dir(), 'contacts-logo-');
+        $png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aG7cAAAAASUVORK5CYII=');
+        file_put_contents($logo, $png);
+        config([
+            'contacts.emailVerification.email.brand_name' => 'Example Company',
+            'contacts.emailVerification.email.logo_path' => $logo,
+            'mail.default' => 'array',
+            'mail.mailers.array' => ['transport' => 'array'],
+            'mail.from' => ['address' => 'sender@example.test', 'name' => 'Example Company'],
+        ]);
+        Mail::swap(new \Illuminate\Mail\MailManager($this->app));
+
+        try {
+            $contact = Owner::create()->addContact('person@example.com', 'email');
+            $this->helper()->sendVerificationEmail($contact);
+            $message = Mail::mailer('array')->getSymfonyTransport()->messages()->sole()->getOriginalMessage();
+            $html = $message->getHtmlBody();
+            $this->assertStringContainsString('alt="Example Company"', $html);
+            $this->assertStringContainsString('src="cid:', $html);
+            $this->assertStringContainsString('copia e incolla', $html);
+            $this->assertStringContainsString('7 giorni', $html);
+            $this->assertStringContainsString('Example Company', $message->getTextBody());
+            $this->assertCount(1, $message->getAttachments());
+            $this->assertSame('inline', $message->getAttachments()[0]->getDisposition());
+            $this->assertSame($png, $message->getAttachments()[0]->getBody());
+
+            preg_match_all('/href="([^"]+)"/', $html, $matches);
+            $this->assertCount(2, $matches[1]);
+            $this->assertSame($matches[1][0], $matches[1][1]);
+            $url = html_entity_decode($matches[1][0], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $this->assertStringContainsString($url, $message->getTextBody());
+            $this->get($url)->assertOk();
+            $this->assertTrue($contact->fresh()->existence_verified);
+            Http::assertNothingSent();
+        } finally {
+            unlink($logo);
+        }
+    }
+
+    public function test_missing_logo_falls_back_to_the_escaped_application_name(): void
+    {
+        config([
+            'contacts.emailVerification.email.brand_name' => null,
+            'contacts.emailVerification.email.logo_path' => __DIR__ . '/missing-logo.png',
+            'app.name' => 'Example <Company>',
+        ]);
+        $html = (new ContactEmailVerificationMail('https://example.test/confirmation', 7))->render();
+
+        $this->assertStringContainsString('Example &lt;Company&gt;', $html);
+        $this->assertStringNotContainsString('<img', $html);
+        Http::assertNothingSent();
+    }
+
     private function helper(): ContactEmailVerificationHelper
     {
         return app(ContactEmailVerificationHelper::class);

@@ -47,6 +47,8 @@ return [
     'emailVerification' => [
         'email' => [
             'expires_days' => 7,
+            'brand_name' => null, // Defaults to app.name, then mail.from.name.
+            'logo_path' => null, // Absolute local path, e.g. public_path('img/logo.png').
         ],
         'verifalia' => [
             'username' => env('CONTACTS_VERIFALIA_USERNAME'),

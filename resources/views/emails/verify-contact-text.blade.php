@@ -1,3 +1,7 @@
+{!! $brandName !!}
+
+{!! __('contacts::verification.subject') !!}
+
 {!! __('contacts::verification.introduction') !!}
 
 {!! $verificationUrl !!}
