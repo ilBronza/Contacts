@@ -11,9 +11,7 @@ class ContactTableRelatedFieldsParameters extends FieldsGroupParametersFile
 		return [
             'translationPrefix' => 'contacts::fields',
             'fields' => [
-                'mySelfTargetType.contactable' => 'translatedClassBasename',
-                'contactable' => 'relations.BelongsTo',
-                'contacttype' => 'relations.BelongsTo',
+                'contacttype.name' => 'flat',
                 'contact' => 'flat',
                 'existence_verified' => [
                     'type' => 'boolean',

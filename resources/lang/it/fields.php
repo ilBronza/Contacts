@@ -6,7 +6,7 @@ return [
   'contacttype' => 'Tipologia',
   'sorting_index' => 'Ordinamento',
   'contact' => 'Contatto',
-  'existence_verified' => 'Email verificata',
+  'existence_verified' => 'Verificato',
   'contacts_count' => 'Contatti',
   'mySelfTargetType.contactable' => 'Elemento',
   'created_at' => 'Creato il',
